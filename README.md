@@ -1,34 +1,15 @@
-# Bolão Copa 2026 V5
+# Bolão Copa 2026 V7
 
-Versão alinhada com as tabelas reais do seu Supabase.
+Correções desta versão:
 
-## Estrutura esperada
-
-### admins
-- email
-- created_at
-
-### games
-- id
-- home_team
-- away_team
-- game_date
-- game_time
-- status
-- created_at
-
-### bets
-- id
-- name
-- whatsapp
-- game_id
-- home_score
-- away_score
-- status
+- Campos de palpite mostram os nomes dos times.
+- Bandeiras por imagem, com suporte a Brasil e Escócia.
+- Código alinhado às tabelas reais: admins, games e bets.
+- Inclui SQL para corrigir o erro bets_status_check ao validar pagamento.
 
 ## Arquivos para subir no GitHub
 
-Substitua todos os arquivos atuais do repositório por estes:
+Substitua todos estes arquivos no repositório:
 
 - index.html
 - style.css
@@ -36,30 +17,8 @@ Substitua todos os arquivos atuais do repositório por estes:
 - config.js
 - README.md
 
-## Depois de subir
+Depois faça Ctrl + F5 no site.
 
-Aguarde o GitHub Pages atualizar.
+## SQL obrigatório antes de validar pagamentos
 
-Abra:
-https://fbelota.github.io/bolao-copa-2026/
-
-Faça Ctrl + F5.
-
-Teste um palpite em aba anônima.
-
-Depois valide no painel do organizador.
-
-## Ajustes pendentes
-
-Edite o config.js no GitHub para trocar:
-
-- PIX_CHAVE
-- PIX_TEXTO
-- WHATSAPP_ORGANIZADOR
-
-
-## Alterações da V6
-
-- Campos de placar mostram os nomes reais dos times.
-- Card do jogo mostra bandeiras por país quando reconhecido.
-- Config.js aplicado conforme arquivo enviado pelo organizador.
+Execute o arquivo `supabase-ajuste-v7.sql` no Supabase.

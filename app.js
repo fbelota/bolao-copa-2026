@@ -17,21 +17,42 @@ function normalizeTeamName(name){
     .toLowerCase()
     .trim();
 }
-const FLAG_MAP = {
-  'brasil':'🇧🇷','brazil':'🇧🇷',
-  'escocia':'🏴','scotland':'🏴',
-  'argentina':'🇦🇷','mexico':'🇲🇽','canada':'🇨🇦','estados unidos':'🇺🇸','united states':'🇺🇸','usa':'🇺🇸',
-  'alemanha':'🇩🇪','germany':'🇩🇪','franca':'🇫🇷','france':'🇫🇷','inglaterra':'🏴','england':'🏴',
-  'portugal':'🇵🇹','espanha':'🇪🇸','spain':'🇪🇸','uruguai':'🇺🇾','uruguay':'🇺🇾','colombia':'🇨🇴','japao':'🇯🇵','japan':'🇯🇵',
-  'holanda':'🇳🇱','netherlands':'🇳🇱','suecia':'🇸🇪','sweden':'🇸🇪','marrocos':'🇲🇦','morocco':'🇲🇦','haiti':'🇭🇹',
-  'suica':'🇨🇭','switzerland':'🇨🇭','australia':'🇦🇺','turquia':'🇹🇷','turkey':'🇹🇷','paraguai':'🇵🇾','paraguay':'🇵🇾',
-  'belgica':'🇧🇪','belgium':'🇧🇪','egito':'🇪🇬','egypt':'🇪🇬','ira':'🇮🇷','iran':'🇮🇷','nova zelandia':'🇳🇿','new zealand':'🇳🇿',
-  'noruega':'🇳🇴','norway':'🇳🇴','senegal':'🇸🇳','iraque':'🇮🇶','iraq':'🇮🇶','austria':'🇦🇹','argelia':'🇩🇿','algeria':'🇩🇿',
-  'catar':'🇶🇦','qatar':'🇶🇦','africa do sul':'🇿🇦','south africa':'🇿🇦','coreia do sul':'🇰🇷','south korea':'🇰🇷','tchequia':'🇨🇿','czechia':'🇨🇿'
+
+const FLAG_CODE_MAP = {
+  'brasil':'br','brazil':'br',
+  'escocia':'gb-sct','scotland':'gb-sct',
+  'argentina':'ar','mexico':'mx','canada':'ca','estados unidos':'us','united states':'us','usa':'us',
+  'alemanha':'de','germany':'de','franca':'fr','france':'fr','inglaterra':'gb-eng','england':'gb-eng',
+  'portugal':'pt','espanha':'es','spain':'es','uruguai':'uy','uruguay':'uy','colombia':'co',
+  'japao':'jp','japan':'jp','holanda':'nl','netherlands':'nl','suecia':'se','sweden':'se',
+  'marrocos':'ma','morocco':'ma','haiti':'ht','suica':'ch','switzerland':'ch','australia':'au',
+  'turquia':'tr','turkey':'tr','paraguai':'py','paraguay':'py','belgica':'be','belgium':'be',
+  'egito':'eg','egypt':'eg','ira':'ir','iran':'ir','nova zelandia':'nz','new zealand':'nz',
+  'noruega':'no','norway':'no','senegal':'sn','iraque':'iq','iraq':'iq','austria':'at',
+  'argelia':'dz','algeria':'dz','catar':'qa','qatar':'qa','africa do sul':'za','south africa':'za',
+  'coreia do sul':'kr','south korea':'kr','tchequia':'cz','czechia':'cz',
+  'croacia':'hr','croatia':'hr','gana':'gh','ghana':'gh','panama':'pa',
+  'tunisia':'tn','tunisia':'tn','jordan':'jo','jordania':'jo','equador':'ec','ecuador':'ec',
+  'curacao':'cw','costa do marfim':'ci','ivory coast':'ci','cabo verde':'cv','cape verde':'cv',
+  'arabia saudita':'sa','saudi arabia':'sa','uzbequistao':'uz','uzbekistan':'uz',
+  'congo dr':'cd','dr congo':'cd','bosnia':'ba','bosnia and herzegovina':'ba'
 };
-function teamFlag(name){
-  return FLAG_MAP[normalizeTeamName(name)] || '⚽';
+
+function flagCode(name){
+  return FLAG_CODE_MAP[normalizeTeamName(name)] || '';
 }
+
+function teamFlagHtml(name){
+  const code = flagCode(name);
+  const initials = String(name || 'Time').slice(0,2).toUpperCase();
+  if(!code) return `<span class="flag-fallback">${initials}</span>`;
+  return `<img class="flag-img" src="https://flagcdn.com/w80/${code}.png" alt="Bandeira ${escapeHtml(name)}" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'flag-fallback',textContent:'${initials}'}))">`;
+}
+
+function escapeHtml(value){
+  return String(value || '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+}
+
 function updateScoreFields(){
   if(!currentGame) return;
   const home = currentGame.home_team || 'Time A';
@@ -46,7 +67,7 @@ function statusLabel(s){
   return s === 'open' ? 'Apostas abertas' : s === 'closed' ? 'Apostas fechadas' : 'Finalizado';
 }
 function betStatusLabel(s){
-  return s === 'validated' ? 'Validado' : 'Pendente';
+  return (s === 'validated' || s === 'paid') ? 'Validado' : 'Pendente';
 }
 function showError(prefix, err){
   console.error(prefix, err);
@@ -75,12 +96,12 @@ function renderGame(){
   const away = currentGame.away_team || 'Time B';
   box.innerHTML = `
     <div class="match-card">
-      <span class="flag" aria-hidden="true">${teamFlag(home)}</span>
+      <span class="flag" aria-hidden="true">${teamFlagHtml(home)}</span>
       <div class="match-info">
         <div class="game-title">${home} x ${away}</div>
         <div class="muted">${fmtDate(currentGame.game_date)} às ${String(currentGame.game_time).slice(0,5)} | ${statusLabel(currentGame.status)}</div>
       </div>
-      <span class="flag right" aria-hidden="true">${teamFlag(away)}</span>
+      <span class="flag right" aria-hidden="true">${teamFlagHtml(away)}</span>
     </div>`;
   $('betForm').classList.toggle('hidden', currentGame.status !== 'open');
   updateScoreFields();
@@ -102,7 +123,7 @@ async function loadBets(){
   renderAdminBets(data || []);
 }
 function renderStats(bets){
-  const valid = bets.filter(b => b.status === 'validated');
+  const valid = bets.filter(b => b.status === 'validated' || b.status === 'paid');
   const pending = bets.filter(b => b.status !== 'validated');
   $('totalBets').textContent = bets.length;
   $('validBets').textContent = valid.length;
@@ -117,7 +138,7 @@ function renderStats(bets){
   $('scoreStats').innerHTML = entries.length ? entries.map(([score,count]) => `<div class="score-item"><strong>${score}</strong><span class="muted">${count} palpite(s)</span></div>`).join('') : 'Nenhum palpite enviado.';
 }
 function renderPublicBets(bets){
-  $('publicBets').innerHTML = bets.length ? bets.map(b => `<div class="bet-item"><strong>${b.name}</strong><div>${b.home_score} x ${b.away_score}</div><span class="status ${b.status === 'validated' ? 'validated':''}">${betStatusLabel(b.status)}</span></div>`).join('') : 'Nenhum palpite ainda.';
+  $('publicBets').innerHTML = bets.length ? bets.map(b => `<div class="bet-item"><strong>${b.name}</strong><div>${b.home_score} x ${b.away_score}</div><span class="status ${(b.status === 'validated' || b.status === 'paid') ? 'validated':''}">${betStatusLabel(b.status)}</span></div>`).join('') : 'Nenhum palpite ainda.';
 }
 function renderAdminBets(bets){
   const box = $('adminBets');
@@ -128,9 +149,9 @@ function renderAdminBets(bets){
         <strong>${b.name}</strong>
         <div class="muted">WhatsApp: ${b.whatsapp}</div>
         <div>Palpite: ${b.home_score} x ${b.away_score}</div>
-        <span class="status ${b.status === 'validated' ? 'validated':''}">${betStatusLabel(b.status)}</span>
+        <span class="status ${(b.status === 'validated' || b.status === 'paid') ? 'validated':''}">${betStatusLabel(b.status)}</span>
       </div>
-      ${b.status === 'validated' ? '<button class="btn secondary" disabled>Validado</button>' : `<button class="btn" onclick="validateBet(${b.id})">Validar pagamento</button>`}
+      ${(b.status === 'validated' || b.status === 'paid') ? '<button class="btn secondary" disabled>Validado</button>' : `<button class="btn" onclick="validateBet(${b.id})">Validar pagamento</button>`}
     </div>`).join('') : 'Nenhum palpite ainda.';
 }
 
