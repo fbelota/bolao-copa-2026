@@ -44,11 +44,16 @@ function gameDateTime(game){
   if(!game?.game_date || !game?.game_time) return null;
   return new Date(`${game.game_date}T${String(game.game_time).slice(0,5)}:00`);
 }
+function gameClosingTime(game){
+  const dt = gameDateTime(game);
+  if(!dt || Number.isNaN(dt.getTime())) return null;
+  return new Date(dt.getTime() - (60 * 60 * 1000));
+}
 function isGameOpen(){
   if(!currentGame || currentGame.status !== 'open') return false;
-  const dt = gameDateTime(currentGame);
-  if(!dt || Number.isNaN(dt.getTime())) return currentGame.status === 'open';
-  return new Date() < dt;
+  const closingTime = gameClosingTime(currentGame);
+  if(!closingTime) return currentGame.status === 'open';
+  return new Date() < closingTime;
 }
 function statusLabel(s){ return s === 'open' ? 'Apostas abertas' : s === 'closed' ? 'Apostas fechadas' : 'Finalizado'; }
 function betStatusLabel(s){ return (s === 'validated' || s === 'paid') ? 'Validado' : 'Pendente'; }
@@ -131,10 +136,12 @@ function renderCountdown(){
   if(!currentGame){ box.classList.add('hidden'); return; }
   const dt = gameDateTime(currentGame);
   if(!dt || Number.isNaN(dt.getTime())){ box.classList.add('hidden'); return; }
-  const diff = dt - new Date();
+  const closingTime = gameClosingTime(currentGame);
+  if(!closingTime){ box.classList.add('hidden'); return; }
+  const diff = closingTime - new Date();
   if(diff <= 0){
     box.classList.remove('hidden');
-    box.textContent = 'Apostas encerradas pelo horário do jogo.';
+    box.textContent = 'Apostas encerradas. O bolão fecha 1 hora antes do jogo.';
     $('betForm').classList.add('hidden');
     $('closedNotice').classList.remove('hidden');
     return;

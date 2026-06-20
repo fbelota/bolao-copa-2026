@@ -1,18 +1,19 @@
-# Bolão Copa 2026 V10
+# Bolão Copa 2026 V9
 
-Versão com jogos isolados, layout mobile, compartilhamento por WhatsApp, bloqueio por horário, resultado oficial, ranking, regras rápidas, prêmio estimado e WhatsApp mascarado na área pública.
+Versão otimizada para divulgação por WhatsApp e uso em celular.
 
-## Atualização obrigatória no Supabase
+## O que mudou
 
-Antes de subir os arquivos no GitHub, execute no Supabase:
-
-`supabase-ajuste-v10.sql`
-
-Caminho:
-
-SQL Editor -> New query -> cole o conteúdo -> Run
+- Layout mais responsivo para celular.
+- Texto do jogo centralizado entre as bandeiras.
+- Botão Compartilhar no WhatsApp.
+- Campos de placar com nomes dos times.
+- Botões e cards ajustados para toque.
+- Sem PWA e sem instalação de aplicativo.
 
 ## Arquivos para subir no GitHub
+
+Substitua no repositório:
 
 - index.html
 - style.css
@@ -20,4 +21,10 @@ SQL Editor -> New query -> cole o conteúdo -> Run
 - config.js
 - README.md
 
-Depois use Ctrl + F5 no navegador.
+Depois abra o site e pressione Ctrl + F5.
+
+
+Ajustes da V11:
+- Apostas encerram automaticamente 1 hora antes do jogo.
+- Card Pontuação removido das regras rápidas.
+- Card Encerramento incluído no lugar.
