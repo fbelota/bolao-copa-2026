@@ -56,3 +56,10 @@ Edite o config.js no GitHub para trocar:
 - PIX_CHAVE
 - PIX_TEXTO
 - WHATSAPP_ORGANIZADOR
+
+
+## Alterações da V6
+
+- Campos de placar mostram os nomes reais dos times.
+- Card do jogo mostra bandeiras por país quando reconhecido.
+- Config.js aplicado conforme arquivo enviado pelo organizador.

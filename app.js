@@ -9,6 +9,39 @@ function fmtDate(date){
   const [y,m,d] = date.split('-');
   return `${d}/${m}/${y}`;
 }
+
+function normalizeTeamName(name){
+  return String(name || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+}
+const FLAG_MAP = {
+  'brasil':'🇧🇷','brazil':'🇧🇷',
+  'escocia':'🏴','scotland':'🏴',
+  'argentina':'🇦🇷','mexico':'🇲🇽','canada':'🇨🇦','estados unidos':'🇺🇸','united states':'🇺🇸','usa':'🇺🇸',
+  'alemanha':'🇩🇪','germany':'🇩🇪','franca':'🇫🇷','france':'🇫🇷','inglaterra':'🏴','england':'🏴',
+  'portugal':'🇵🇹','espanha':'🇪🇸','spain':'🇪🇸','uruguai':'🇺🇾','uruguay':'🇺🇾','colombia':'🇨🇴','japao':'🇯🇵','japan':'🇯🇵',
+  'holanda':'🇳🇱','netherlands':'🇳🇱','suecia':'🇸🇪','sweden':'🇸🇪','marrocos':'🇲🇦','morocco':'🇲🇦','haiti':'🇭🇹',
+  'suica':'🇨🇭','switzerland':'🇨🇭','australia':'🇦🇺','turquia':'🇹🇷','turkey':'🇹🇷','paraguai':'🇵🇾','paraguay':'🇵🇾',
+  'belgica':'🇧🇪','belgium':'🇧🇪','egito':'🇪🇬','egypt':'🇪🇬','ira':'🇮🇷','iran':'🇮🇷','nova zelandia':'🇳🇿','new zealand':'🇳🇿',
+  'noruega':'🇳🇴','norway':'🇳🇴','senegal':'🇸🇳','iraque':'🇮🇶','iraq':'🇮🇶','austria':'🇦🇹','argelia':'🇩🇿','algeria':'🇩🇿',
+  'catar':'🇶🇦','qatar':'🇶🇦','africa do sul':'🇿🇦','south africa':'🇿🇦','coreia do sul':'🇰🇷','south korea':'🇰🇷','tchequia':'🇨🇿','czechia':'🇨🇿'
+};
+function teamFlag(name){
+  return FLAG_MAP[normalizeTeamName(name)] || '⚽';
+}
+function updateScoreFields(){
+  if(!currentGame) return;
+  const home = currentGame.home_team || 'Time A';
+  const away = currentGame.away_team || 'Time B';
+  $('homeScoreLabel').textContent = home;
+  $('awayScoreLabel').textContent = away;
+  $('homeScore').placeholder = `Gols ${home}`;
+  $('awayScore').placeholder = `Gols ${away}`;
+}
+
 function statusLabel(s){
   return s === 'open' ? 'Apostas abertas' : s === 'closed' ? 'Apostas fechadas' : 'Finalizado';
 }
@@ -38,8 +71,19 @@ function renderGame(){
     $('betForm').classList.add('hidden');
     return;
   }
-  box.innerHTML = `<div class="game-title">${currentGame.home_team} x ${currentGame.away_team}</div><div class="muted">${fmtDate(currentGame.game_date)} às ${String(currentGame.game_time).slice(0,5)} | ${statusLabel(currentGame.status)}</div>`;
+  const home = currentGame.home_team || 'Time A';
+  const away = currentGame.away_team || 'Time B';
+  box.innerHTML = `
+    <div class="match-card">
+      <span class="flag" aria-hidden="true">${teamFlag(home)}</span>
+      <div class="match-info">
+        <div class="game-title">${home} x ${away}</div>
+        <div class="muted">${fmtDate(currentGame.game_date)} às ${String(currentGame.game_time).slice(0,5)} | ${statusLabel(currentGame.status)}</div>
+      </div>
+      <span class="flag right" aria-hidden="true">${teamFlag(away)}</span>
+    </div>`;
   $('betForm').classList.toggle('hidden', currentGame.status !== 'open');
+  updateScoreFields();
   $('adminHomeTeam').value = currentGame.home_team || '';
   $('adminAwayTeam').value = currentGame.away_team || '';
   $('adminDate').value = currentGame.game_date || '';

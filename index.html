@@ -25,10 +25,15 @@
         <form id="betForm" class="form">
           <input id="name" placeholder="Seu nome" required />
           <input id="whatsapp" placeholder="WhatsApp com DDD" required />
+          <div class="score-label-row">
+            <label id="homeScoreLabel" for="homeScore">Time A</label>
+            <span></span>
+            <label id="awayScoreLabel" for="awayScore">Time B</label>
+          </div>
           <div class="score-row">
-            <input id="homeScore" type="number" min="0" placeholder="Gols time A" required />
+            <input id="homeScore" type="number" min="0" placeholder="Gols Time A" required />
             <span>x</span>
-            <input id="awayScore" type="number" min="0" placeholder="Gols time B" required />
+            <input id="awayScore" type="number" min="0" placeholder="Gols Time B" required />
           </div>
           <button class="btn" type="submit">Enviar palpite</button>
         </form>
