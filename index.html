@@ -1,107 +1,101 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Bolão Copa 2026</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js"></script>
 </head>
 <body>
-  <header class="topo">
-    <div>
-      <p class="tag">Bolão Online</p>
-      <h1>Copa do Mundo 2026</h1>
-      <p class="sub">Faça seu palpite. O palpite fica pendente até a validação do Pix.</p>
-    </div>
-    <button id="btnAdmin" class="btn secundario">Área do organizador</button>
-  </header>
+  <main class="page">
+    <header class="hero">
+      <div>
+        <p class="tag">Bolão Online</p>
+        <h1>Copa do Mundo 2026</h1>
+        <p>Faça seu palpite. O palpite fica pendente até a validação do Pix.</p>
+      </div>
+      <button id="openAdmin" class="btn secondary">Área do organizador</button>
+    </header>
 
-  <main class="grid">
-    <section class="card destaque">
-      <h2>Jogo aberto</h2>
-      <div id="jogoAberto" class="jogo-box">Carregando jogo...</div>
-      <form id="formPalpite" class="form">
-        <input id="nome" placeholder="Seu nome" required>
-        <input id="whatsapp" placeholder="WhatsApp com DDD" required>
-        <div class="placar">
-          <input id="placarCasa" type="number" min="0" max="30" placeholder="Gols time A" required>
-          <span>x</span>
-          <input id="placarFora" type="number" min="0" max="30" placeholder="Gols time B" required>
+    <section class="grid">
+      <section class="card">
+        <h2>Jogo aberto</h2>
+        <div id="gameBox" class="game-box">Carregando jogo...</div>
+        <form id="betForm" class="form">
+          <input id="name" placeholder="Seu nome" required />
+          <input id="whatsapp" placeholder="WhatsApp com DDD" required />
+          <div class="score-row">
+            <input id="homeScore" type="number" min="0" placeholder="Gols time A" required />
+            <span>x</span>
+            <input id="awayScore" type="number" min="0" placeholder="Gols time B" required />
+          </div>
+          <button class="btn" type="submit">Enviar palpite</button>
+        </form>
+        <div class="pix-box">
+          <h3>Pagamento via Pix</h3>
+          <p id="pixText"></p>
+          <a id="whatsProof" class="btn" target="_blank" rel="noopener">Enviar comprovante no WhatsApp</a>
         </div>
-        <button class="btn" type="submit">Enviar palpite</button>
-      </form>
-      <div class="pix">
-        <strong>Pagamento via Pix</strong>
-        <p id="pixTexto"></p>
-        <button id="btnWhats" class="btn whats" type="button">Enviar comprovante no WhatsApp</button>
-      </div>
-    </section>
+      </section>
 
-    <section class="card">
-      <h2>Resumo</h2>
-      <div class="metricas">
-        <div><strong id="totalPalpites">0</strong><span>palpites</span></div>
-        <div><strong id="validados">0</strong><span>validados</span></div>
-        <div><strong id="pendentes">0</strong><span>pendentes</span></div>
-        <div><strong id="arrecadado">R$ 0,00</strong><span>arrecadado</span></div>
-      </div>
-    </section>
+      <section class="card">
+        <h2>Resumo</h2>
+        <div class="stats">
+          <div><strong id="totalBets">0</strong><span>palpites</span></div>
+          <div><strong id="validBets">0</strong><span>validados</span></div>
+          <div><strong id="pendingBets">0</strong><span>pendentes</span></div>
+          <div><strong id="totalMoney">R$ 0,00</strong><span>arrecadado</span></div>
+        </div>
+      </section>
 
-    <section class="card">
-      <h2>Placares mais escolhidos</h2>
-      <div id="estatisticas" class="lista"></div>
-    </section>
+      <section class="card wide">
+        <h2>Placar mais escolhido</h2>
+        <div id="scoreStats">Nenhum palpite enviado.</div>
+      </section>
 
-    <section class="card full">
-      <h2>Palpites enviados</h2>
-      <div id="listaPalpites" class="tabela-wrap"></div>
+      <section class="card wide">
+        <h2>Palpites enviados</h2>
+        <div id="publicBets">Nenhum palpite ainda.</div>
+      </section>
     </section>
   </main>
 
-  <dialog id="modalAdmin">
-    <div class="modal-head">
-      <h2>Painel do organizador</h2>
-      <button id="fecharAdmin" class="x">×</button>
-    </div>
-
-    <div id="loginBox" class="card interno">
-      <p>Entre com o e-mail cadastrado na tabela admins.</p>
-      <input id="emailAdmin" type="email" placeholder="seu@email.com">
-      <button id="loginAdmin" class="btn">Receber link de acesso</button>
-    </div>
-
-    <div id="painelAdmin" class="admin oculto">
-      <button id="logoutAdmin" class="btn secundario">Sair</button>
-
-      <section class="card interno">
-        <h3>Cadastrar ou atualizar jogo aberto</h3>
-        <form id="formJogo" class="form">
-          <input id="homeTeam" placeholder="Time A. Ex: Brasil" required>
-          <input id="awayTeam" placeholder="Time B. Ex: Escócia" required>
-          <input id="gameDate" type="date" required>
-          <input id="gameTime" type="time" required>
-          <select id="gameStatus">
+  <div id="adminModal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Painel do organizador</h2>
+        <button id="closeAdmin" class="icon-btn">×</button>
+      </div>
+      <div id="loginBox" class="admin-box">
+        <p>Entre com o e-mail cadastrado na tabela admins.</p>
+        <input id="adminEmail" placeholder="seuemail@gmail.com" />
+        <button id="sendLogin" class="btn">Receber link de acesso</button>
+      </div>
+      <div id="adminPanel" class="hidden">
+        <button id="logoutBtn" class="btn secondary">Sair</button>
+        <section class="admin-box">
+          <h3>Cadastrar ou atualizar jogo aberto</h3>
+          <input id="adminHomeTeam" placeholder="Time A" />
+          <input id="adminAwayTeam" placeholder="Time B" />
+          <input id="adminDate" type="date" />
+          <input id="adminTime" type="time" />
+          <select id="adminStatus">
             <option value="open">Aberto</option>
             <option value="closed">Fechado</option>
             <option value="finished">Finalizado</option>
           </select>
-          <button class="btn" type="submit">Salvar jogo</button>
-        </form>
-      </section>
-
-      <section class="card interno">
-        <h3>Validação de pagamentos</h3>
-        <div id="adminBets" class="lista"></div>
-      </section>
+          <button id="saveGame" class="btn">Salvar jogo</button>
+        </section>
+        <section class="admin-box">
+          <h3>Validação de pagamentos</h3>
+          <div id="adminBets">Nenhum palpite ainda.</div>
+        </section>
+      </div>
     </div>
-  </dialog>
+  </div>
 
-  <footer>
-    <p>Bolão administrado manualmente. Apenas palpites validados entram no valor arrecadado.</p>
-  </footer>
-
+  <script src="config.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

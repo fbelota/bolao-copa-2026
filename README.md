@@ -1,41 +1,14 @@
-# Bolão Copa 2026 V3
+# Bolão Copa 2026 V5
 
-Esta versão foi ajustada para o seu Supabase atual.
+Versão alinhada com as tabelas reais do seu Supabase.
 
-## Arquivos que vão para o GitHub
+## Estrutura esperada
 
-Envie estes arquivos para o repositório:
+### admins
+- email
+- created_at
 
-- index.html
-- style.css
-- app.js
-- config.js
-- README.md
-
-O arquivo `supabase-ajuste-v3.sql` é opcional. Use apenas se aparecer erro de permissão ou coluna.
-
-## Configuração do config.js
-
-Abra o arquivo `config.js` e troque:
-
-```js
-SUPABASE_ANON_KEY: "COLE_AQUI_SUA_CHAVE_COMPLETA_sb_publishable"
-```
-
-pela sua Publishable Key completa.
-
-Também troque:
-
-```js
-PIX_CHAVE: "COLE_AQUI_SUA_CHAVE_PIX"
-PIX_TEXTO: "Pix: COLE_AQUI_SUA_CHAVE_PIX | Valor: R$ 10,00"
-WHATSAPP_ORGANIZADOR: "5592999999999"
-```
-
-## Campos usados no Supabase
-
-Tabela games:
-
+### games
 - id
 - home_team
 - away_team
@@ -44,88 +17,42 @@ Tabela games:
 - status
 - created_at
 
-Tabela bets:
-
+### bets
 - id
+- name
+- whatsapp
 - game_id
-- bettor_name
-- bettor_whatsapp
 - home_score
 - away_score
 - status
-- created_at
 
-Tabela admins:
+## Arquivos para subir no GitHub
 
-- id
-- email
+Substitua todos os arquivos atuais do repositório por estes:
 
-## Publicação no GitHub Pages
+- index.html
+- style.css
+- app.js
+- config.js
+- README.md
 
-1. Abra seu repositório `bolao-copa-2026`.
-2. Clique em `uploading an existing file`.
-3. Arraste os arquivos do projeto.
-4. Clique em `Commit changes`.
-5. Vá em `Settings`.
-6. Clique em `Pages`.
-7. Em Source, escolha `Deploy from a branch`.
-8. Branch: `main`.
-9. Folder: `/root`.
-10. Clique em `Save`.
+## Depois de subir
 
-Seu site ficará em:
+Aguarde o GitHub Pages atualizar.
 
+Abra:
 https://fbelota.github.io/bolao-copa-2026/
 
-## Supabase URL Configuration
+Faça Ctrl + F5.
 
-Depois que o GitHub Pages estiver ativo, volte no Supabase:
+Teste um palpite em aba anônima.
 
-Authentication → URL Configuration
+Depois valide no painel do organizador.
 
-Site URL:
+## Ajustes pendentes
 
-https://fbelota.github.io/bolao-copa-2026/
+Edite o config.js no GitHub para trocar:
 
-Redirect URLs:
-
-https://fbelota.github.io/bolao-copa-2026/
-
-Salve.
-
-## Status corretos
-
-Use sempre minúsculo.
-
-Para jogos:
-
-- open
-- closed
-- finished
-
-Para palpites:
-
-- pending
-- validated
-- cancelled
-
-
-## V4 configurada
-
-Esta versão já está configurada com:
-
-- Supabase URL: https://ppzpfhnnfjplagfozyuh.supabase.co
-- Publishable Key informada no chat
-- Campos compatíveis com as tabelas `admins`, `bets` e `games`
-
-Antes de publicar, ajuste no arquivo `config.js` apenas estes campos, se desejar:
-
-- `VALOR_PALPITE`
-- `PIX_CHAVE`
-- `PIX_TEXTO`
-- `WHATSAPP_ORGANIZADOR`
-
-Depois de publicar no GitHub Pages, volte ao Supabase em Authentication > URL Configuration e troque:
-
-- Site URL para `https://fbelota.github.io/bolao-copa-2026`
-- Redirect URLs para `https://fbelota.github.io/bolao-copa-2026`
+- PIX_CHAVE
+- PIX_TEXTO
+- WHATSAPP_ORGANIZADOR

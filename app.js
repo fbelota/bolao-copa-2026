@@ -1,154 +1,188 @@
 const cfg = window.BOLAO_CONFIG;
-const client = supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
-let jogoAtual = null;
-let usuario = null;
+const supabaseClient = supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
+let currentGame = null;
+const money = new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'});
+const $ = id => document.getElementById(id);
 
-const fmtBRL = v => Number(v || 0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-const statusLabel = s => s === 'validated' || s === 'paid' ? 'validado' : 'pendente';
-const betStatus = b => b.status || (b.validated ? 'validated' : 'pending');
-
-async function carregarTudo(){
-  await carregarJogo();
-  await carregarPalpites();
+function fmtDate(date){
+  if(!date) return '';
+  const [y,m,d] = date.split('-');
+  return `${d}/${m}/${y}`;
+}
+function statusLabel(s){
+  return s === 'open' ? 'Apostas abertas' : s === 'closed' ? 'Apostas fechadas' : 'Finalizado';
+}
+function betStatusLabel(s){
+  return s === 'validated' ? 'Validado' : 'Pendente';
+}
+function showError(prefix, err){
+  console.error(prefix, err);
+  alert(`${prefix}: ${err?.message || err}`);
 }
 
-async function carregarJogo(){
-  const { data, error } = await client.from('games').select('*').order('created_at',{ascending:false}).limit(1).maybeSingle();
-  if(error){mostrarErro('Erro ao carregar jogo: '+error.message);return;}
-  jogoAtual = data;
-  const box = document.getElementById('jogoAberto');
-  const form = document.getElementById('formPalpite');
-  if(!data){box.innerHTML='Nenhum jogo cadastrado ainda.';form.style.display='none';return;}
-  const aberto = data.status === 'open';
-  box.innerHTML = `<strong>${data.home_team} x ${data.away_team}</strong><span>${formatarData(data.game_date)} às ${String(data.game_time).slice(0,5)} | ${aberto?'Apostas abertas':'Apostas fechadas'}</span>`;
-  form.style.display = aberto ? 'grid' : 'none';
-  document.getElementById('homeTeam').value = data.home_team || '';
-  document.getElementById('awayTeam').value = data.away_team || '';
-  document.getElementById('gameDate').value = data.game_date || '';
-  document.getElementById('gameTime').value = String(data.game_time || '').slice(0,5);
-  document.getElementById('gameStatus').value = data.status || 'open';
+async function loadGame(){
+  const { data, error } = await supabaseClient
+    .from('games')
+    .select('*')
+    .order('created_at', { ascending:false })
+    .limit(1)
+    .maybeSingle();
+  if(error){ showError('Erro ao carregar jogo', error); return; }
+  currentGame = data;
+  renderGame();
+}
+function renderGame(){
+  const box = $('gameBox');
+  if(!currentGame){
+    box.innerHTML = '<p class="muted">Nenhum jogo cadastrado pelo organizador.</p>';
+    $('betForm').classList.add('hidden');
+    return;
+  }
+  box.innerHTML = `<div class="game-title">${currentGame.home_team} x ${currentGame.away_team}</div><div class="muted">${fmtDate(currentGame.game_date)} às ${String(currentGame.game_time).slice(0,5)} | ${statusLabel(currentGame.status)}</div>`;
+  $('betForm').classList.toggle('hidden', currentGame.status !== 'open');
+  $('adminHomeTeam').value = currentGame.home_team || '';
+  $('adminAwayTeam').value = currentGame.away_team || '';
+  $('adminDate').value = currentGame.game_date || '';
+  $('adminTime').value = String(currentGame.game_time || '').slice(0,5);
+  $('adminStatus').value = currentGame.status || 'open';
 }
 
-function formatarData(d){
-  if(!d) return '';
-  const [a,m,di]=d.split('-');
-  return `${di}/${m}/${a}`;
+async function loadBets(){
+  const { data, error } = await supabaseClient
+    .from('bets')
+    .select('*, games(home_team, away_team)')
+    .order('id', { ascending:false });
+  if(error){ showError('Erro ao carregar palpites', error); return; }
+  renderStats(data || []);
+  renderPublicBets(data || []);
+  renderAdminBets(data || []);
 }
-
-async function carregarPalpites(){
-  let q = client.from('bets').select('*').order('created_at',{ascending:false});
-  const {data,error}= await q;
-  if(error){mostrarErro('Erro ao carregar palpites: '+error.message);return;}
-  const bets = data || [];
-  renderResumo(bets);
-  renderStats(bets);
-  renderLista(bets);
-  renderAdminBets(bets);
-}
-
-function renderResumo(bets){
-  const validados = bets.filter(b=>['validated','paid'].includes(betStatus(b))).length;
-  const pendentes = bets.length - validados;
-  document.getElementById('totalPalpites').textContent = bets.length;
-  document.getElementById('validados').textContent = validados;
-  document.getElementById('pendentes').textContent = pendentes;
-  document.getElementById('arrecadado').textContent = fmtBRL(validados * cfg.VALOR_PALPITE);
-  document.getElementById('pixTexto').textContent = cfg.PIX_TEXTO;
-}
-
-function placarDe(b){return `${b.home_score} x ${b.away_score}`;}
-
 function renderStats(bets){
-  const cont = {};
-  bets.forEach(b=>{const p=placarDe(b);cont[p]=(cont[p]||0)+1;});
-  const arr = Object.entries(cont).sort((a,b)=>b[1]-a[1]);
-  document.getElementById('estatisticas').innerHTML = arr.length ? arr.map(([p,n])=>`<div class="item"><strong>${p}</strong><span>${n} palpite(s)</span></div>`).join('') : 'Nenhum palpite enviado.';
+  const valid = bets.filter(b => b.status === 'validated');
+  const pending = bets.filter(b => b.status !== 'validated');
+  $('totalBets').textContent = bets.length;
+  $('validBets').textContent = valid.length;
+  $('pendingBets').textContent = pending.length;
+  $('totalMoney').textContent = money.format(valid.length * Number(cfg.VALOR_PALPITE || 0));
+  const counts = {};
+  bets.forEach(b => {
+    const key = `${b.home_score} x ${b.away_score}`;
+    counts[key] = (counts[key] || 0) + 1;
+  });
+  const entries = Object.entries(counts).sort((a,b) => b[1] - a[1]);
+  $('scoreStats').innerHTML = entries.length ? entries.map(([score,count]) => `<div class="score-item"><strong>${score}</strong><span class="muted">${count} palpite(s)</span></div>`).join('') : 'Nenhum palpite enviado.';
 }
-
-function renderLista(bets){
-  const html = `<table><thead><tr><th>Nome</th><th>WhatsApp</th><th>Placar</th><th>Status</th><th>Data</th></tr></thead><tbody>${bets.map(b=>`<tr><td>${esc(b.bettor_name||b.name||'')}</td><td>${esc(b.bettor_whatsapp||b.whatsapp||'')}</td><td>${placarDe(b)}</td><td><span class="badge ${statusLabel(betStatus(b))}">${statusLabel(betStatus(b))}</span></td><td>${new Date(b.created_at).toLocaleString('pt-BR')}</td></tr>`).join('')}</tbody></table>`;
-  document.getElementById('listaPalpites').innerHTML = bets.length ? html : 'Nenhum palpite enviado.';
+function renderPublicBets(bets){
+  $('publicBets').innerHTML = bets.length ? bets.map(b => `<div class="bet-item"><strong>${b.name}</strong><div>${b.home_score} x ${b.away_score}</div><span class="status ${b.status === 'validated' ? 'validated':''}">${betStatusLabel(b.status)}</span></div>`).join('') : 'Nenhum palpite ainda.';
 }
-
 function renderAdminBets(bets){
-  const el = document.getElementById('adminBets');
-  if(!el) return;
-  el.innerHTML = bets.length ? bets.map(b=>`<div class="item admin-bet"><div><strong>${esc(b.bettor_name||b.name||'')}</strong><br><span>${esc(b.bettor_whatsapp||b.whatsapp||'')} | ${placarDe(b)} | ${statusLabel(betStatus(b))}</span></div><button class="btn" onclick="validarBet(${b.id})">Validar pagamento</button></div>`).join('') : 'Nenhum palpite ainda.';
+  const box = $('adminBets');
+  if(!box) return;
+  box.innerHTML = bets.length ? bets.map(b => `
+    <div class="bet-item admin-row">
+      <div>
+        <strong>${b.name}</strong>
+        <div class="muted">WhatsApp: ${b.whatsapp}</div>
+        <div>Palpite: ${b.home_score} x ${b.away_score}</div>
+        <span class="status ${b.status === 'validated' ? 'validated':''}">${betStatusLabel(b.status)}</span>
+      </div>
+      ${b.status === 'validated' ? '<button class="btn secondary" disabled>Validado</button>' : `<button class="btn" onclick="validateBet(${b.id})">Validar pagamento</button>`}
+    </div>`).join('') : 'Nenhum palpite ainda.';
 }
 
-async function validarBet(id){
-  const {error}= await client.from('bets').update({status:'validated'}).eq('id',id);
-  if(error){mostrarErro(error.message);return;}
-  await carregarPalpites();
-}
-window.validarBet = validarBet;
-
-function esc(s){return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
-function mostrarErro(msg){alert(msg);}
-
-async function checarAdmin(){
-  const {data:{session}}= await client.auth.getSession();
-  usuario = session?.user || null;
-  if(!usuario){mostrarLogin();return;}
-  const {data,error}= await client.from('admins').select('*').eq('email',usuario.email).maybeSingle();
-  if(error || !data){alert('Seu e-mail não está cadastrado como administrador.');mostrarLogin();return;}
-  mostrarPainel();
-}
-function mostrarLogin(){document.getElementById('loginBox').classList.remove('oculto');document.getElementById('painelAdmin').classList.add('oculto');}
-function mostrarPainel(){document.getElementById('loginBox').classList.add('oculto');document.getElementById('painelAdmin').classList.remove('oculto');carregarTudo();}
-
-document.getElementById('formPalpite').addEventListener('submit', async e=>{
+async function submitBet(e){
   e.preventDefault();
-  if(!jogoAtual || jogoAtual.status !== 'open'){alert('Não existe jogo aberto para palpites.');return;}
-  const novo = {
-    game_id: jogoAtual.id,
-    bettor_name: document.getElementById('nome').value.trim(),
-    bettor_whatsapp: document.getElementById('whatsapp').value.trim(),
-    home_score: Number(document.getElementById('placarCasa').value),
-    away_score: Number(document.getElementById('placarFora').value),
+  if(!currentGame || currentGame.status !== 'open') return alert('Não há jogo aberto para apostas.');
+  const payload = {
+    name: $('name').value.trim(),
+    whatsapp: $('whatsapp').value.trim(),
+    game_id: currentGame.id,
+    home_score: Number($('homeScore').value),
+    away_score: Number($('awayScore').value),
     status: 'pending'
   };
-  const {error}= await client.from('bets').insert(novo);
-  if(error){mostrarErro('Erro ao enviar palpite: '+error.message);return;}
+  const { error } = await supabaseClient.from('bets').insert(payload);
+  if(error){ showError('Erro ao enviar palpite', error); return; }
   e.target.reset();
-  alert('Palpite enviado. Agora faça o Pix e envie o comprovante pelo WhatsApp.');
-  carregarPalpites();
-});
+  alert('Palpite enviado. Envie o comprovante do Pix pelo WhatsApp.');
+  await loadBets();
+}
 
-document.getElementById('btnWhats').addEventListener('click',()=>{
-  const msg = encodeURIComponent('Olá. Enviei meu palpite no bolão e vou mandar o comprovante do Pix.');
-  window.open(`https://wa.me/${cfg.WHATSAPP_ORGANIZADOR}?text=${msg}`,'_blank');
-});
+async function validateBet(id){
+  const { error } = await supabaseClient.from('bets').update({ status:'validated' }).eq('id', id);
+  if(error){ showError('Erro ao validar pagamento', error); return; }
+  await loadBets();
+}
+window.validateBet = validateBet;
 
-document.getElementById('btnAdmin').addEventListener('click',()=>{document.getElementById('modalAdmin').showModal();checarAdmin();});
-document.getElementById('fecharAdmin').addEventListener('click',()=>document.getElementById('modalAdmin').close());
-
-document.getElementById('loginAdmin').addEventListener('click',async()=>{
-  const email = document.getElementById('emailAdmin').value.trim();
-  if(!email){alert('Informe seu e-mail.');return;}
-  const {error}= await client.auth.signInWithOtp({email,options:{emailRedirectTo: window.location.href}});
-  if(error){mostrarErro(error.message);return;}
-  alert('Enviamos um link de acesso para seu e-mail.');
-});
-
-document.getElementById('logoutAdmin').addEventListener('click',async()=>{await client.auth.signOut();mostrarLogin();});
-
-document.getElementById('formJogo').addEventListener('submit',async e=>{
-  e.preventDefault();
+async function saveGame(){
   const payload = {
-    home_team: document.getElementById('homeTeam').value.trim(),
-    away_team: document.getElementById('awayTeam').value.trim(),
-    game_date: document.getElementById('gameDate').value,
-    game_time: document.getElementById('gameTime').value,
-    status: document.getElementById('gameStatus').value
+    home_team: $('adminHomeTeam').value.trim(),
+    away_team: $('adminAwayTeam').value.trim(),
+    game_date: $('adminDate').value,
+    game_time: $('adminTime').value,
+    status: $('adminStatus').value
   };
-  let res;
-  if(jogoAtual?.id) res = await client.from('games').update(payload).eq('id',jogoAtual.id);
-  else res = await client.from('games').insert(payload);
-  if(res.error){mostrarErro(res.error.message);return;}
+  if(!payload.home_team || !payload.away_team || !payload.game_date || !payload.game_time) return alert('Preencha todos os dados do jogo.');
+  let result;
+  if(currentGame?.id){
+    result = await supabaseClient.from('games').update(payload).eq('id', currentGame.id);
+  } else {
+    result = await supabaseClient.from('games').insert(payload);
+  }
+  if(result.error){ showError('Erro ao salvar jogo', result.error); return; }
   alert('Jogo salvo.');
-  await carregarJogo();
-});
+  await loadGame();
+}
 
-client.channel('public-changes').on('postgres_changes',{event:'*',schema:'public'},carregarTudo).subscribe();
-carregarTudo();
+async function isAdmin(email){
+  const normalized = String(email || '').trim().toLowerCase();
+  const { data, error } = await supabaseClient.from('admins').select('email').ilike('email', normalized).maybeSingle();
+  if(error){ showError('Erro ao verificar administrador', error); return false; }
+  return !!data;
+}
+async function sendLogin(){
+  const email = $('adminEmail').value.trim().toLowerCase();
+  if(!email) return alert('Informe seu e-mail.');
+  const ok = await isAdmin(email);
+  if(!ok) return alert('Seu e-mail não está cadastrado como administrador.');
+  const { error } = await supabaseClient.auth.signInWithOtp({ email, options:{ emailRedirectTo: window.location.origin + window.location.pathname } });
+  if(error){ showError('Erro ao enviar link', error); return; }
+  alert('Link enviado. Abra o e-mail mais recente do Supabase.');
+}
+async function checkSession(){
+  const { data } = await supabaseClient.auth.getSession();
+  const email = data?.session?.user?.email;
+  const admin = email ? await isAdmin(email) : false;
+  $('loginBox').classList.toggle('hidden', admin);
+  $('adminPanel').classList.toggle('hidden', !admin);
+}
+async function logout(){
+  await supabaseClient.auth.signOut();
+  await checkSession();
+}
+function setupWhatsApp(){
+  $('pixText').textContent = cfg.PIX_TEXTO;
+  const msg = encodeURIComponent('Olá. Segue comprovante do meu Pix para validar meu palpite no bolão.');
+  $('whatsProof').href = `https://wa.me/${cfg.WHATSAPP_ORGANIZADOR}?text=${msg}`;
+}
+function bindEvents(){
+  $('betForm').addEventListener('submit', submitBet);
+  $('openAdmin').addEventListener('click', async () => { $('adminModal').classList.remove('hidden'); await checkSession(); });
+  $('closeAdmin').addEventListener('click', () => $('adminModal').classList.add('hidden'));
+  $('sendLogin').addEventListener('click', sendLogin);
+  $('logoutBtn').addEventListener('click', logout);
+  $('saveGame').addEventListener('click', saveGame);
+}
+async function init(){
+  setupWhatsApp();
+  bindEvents();
+  await loadGame();
+  await loadBets();
+  await checkSession();
+  supabaseClient.channel('bolao')
+    .on('postgres_changes', { event:'*', schema:'public', table:'bets' }, loadBets)
+    .on('postgres_changes', { event:'*', schema:'public', table:'games' }, async()=>{ await loadGame(); await loadBets(); })
+    .subscribe();
+}
+init();
