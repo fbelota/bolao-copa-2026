@@ -1,15 +1,19 @@
-# Bolão Copa 2026 V7
+# Bolão Copa 2026 V9
 
-Correções desta versão:
+Versão otimizada para divulgação por WhatsApp e uso em celular.
 
-- Campos de palpite mostram os nomes dos times.
-- Bandeiras por imagem, com suporte a Brasil e Escócia.
-- Código alinhado às tabelas reais: admins, games e bets.
-- Inclui SQL para corrigir o erro bets_status_check ao validar pagamento.
+## O que mudou
+
+- Layout mais responsivo para celular.
+- Texto do jogo centralizado entre as bandeiras.
+- Botão Compartilhar no WhatsApp.
+- Campos de placar com nomes dos times.
+- Botões e cards ajustados para toque.
+- Sem PWA e sem instalação de aplicativo.
 
 ## Arquivos para subir no GitHub
 
-Substitua todos estes arquivos no repositório:
+Substitua no repositório:
 
 - index.html
 - style.css
@@ -17,8 +21,4 @@ Substitua todos estes arquivos no repositório:
 - config.js
 - README.md
 
-Depois faça Ctrl + F5 no site.
-
-## SQL obrigatório antes de validar pagamentos
-
-Execute o arquivo `supabase-ajuste-v7.sql` no Supabase.
+Depois abra o site e pressione Ctrl + F5.

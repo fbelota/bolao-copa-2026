@@ -231,8 +231,17 @@ function setupWhatsApp(){
   const msg = encodeURIComponent('Olá. Segue comprovante do meu Pix para validar meu palpite no bolão.');
   $('whatsProof').href = `https://wa.me/${cfg.WHATSAPP_ORGANIZADOR}?text=${msg}`;
 }
+
+function shareBolao(){
+  const gameText = currentGame ? `${currentGame.home_team} x ${currentGame.away_team}` : 'Copa do Mundo 2026';
+  const url = window.location.origin + window.location.pathname;
+  const text = `Participe do bolão: ${gameText}. Faça seu palpite aqui: ${url}`;
+  const encoded = encodeURIComponent(text);
+  window.open(`https://wa.me/?text=${encoded}`, '_blank', 'noopener');
+}
 function bindEvents(){
   $('betForm').addEventListener('submit', submitBet);
+  $('shareBolao').addEventListener('click', shareBolao);
   $('openAdmin').addEventListener('click', async () => { $('adminModal').classList.remove('hidden'); await checkSession(); });
   $('closeAdmin').addEventListener('click', () => $('adminModal').classList.add('hidden'));
   $('sendLogin').addEventListener('click', sendLogin);
