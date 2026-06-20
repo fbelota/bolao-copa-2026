@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bolão Copa 2026</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+</head>
+<body>
+  <header class="topo">
+    <div>
+      <p class="tag">Bolão Online</p>
+      <h1>Copa do Mundo 2026</h1>
+      <p class="sub">Faça seu palpite. O palpite fica pendente até a validação do Pix.</p>
+    </div>
+    <button id="btnAdmin" class="btn secundario">Área do organizador</button>
+  </header>
+
+  <main class="grid">
+    <section class="card destaque">
+      <h2>Jogo aberto</h2>
+      <div id="jogoAberto" class="jogo-box">Carregando jogo...</div>
+      <form id="formPalpite" class="form">
+        <input id="nome" placeholder="Seu nome" required>
+        <input id="whatsapp" placeholder="WhatsApp com DDD" required>
+        <div class="placar">
+          <input id="placarCasa" type="number" min="0" max="30" placeholder="Gols time A" required>
+          <span>x</span>
+          <input id="placarFora" type="number" min="0" max="30" placeholder="Gols time B" required>
+        </div>
+        <button class="btn" type="submit">Enviar palpite</button>
+      </form>
+      <div class="pix">
+        <strong>Pagamento via Pix</strong>
+        <p id="pixTexto"></p>
+        <button id="btnWhats" class="btn whats" type="button">Enviar comprovante no WhatsApp</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Resumo</h2>
+      <div class="metricas">
+        <div><strong id="totalPalpites">0</strong><span>palpites</span></div>
+        <div><strong id="validados">0</strong><span>validados</span></div>
+        <div><strong id="pendentes">0</strong><span>pendentes</span></div>
+        <div><strong id="arrecadado">R$ 0,00</strong><span>arrecadado</span></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Placares mais escolhidos</h2>
+      <div id="estatisticas" class="lista"></div>
+    </section>
+
+    <section class="card full">
+      <h2>Palpites enviados</h2>
+      <div id="listaPalpites" class="tabela-wrap"></div>
+    </section>
+  </main>
+
+  <dialog id="modalAdmin">
+    <div class="modal-head">
+      <h2>Painel do organizador</h2>
+      <button id="fecharAdmin" class="x">×</button>
+    </div>
+
+    <div id="loginBox" class="card interno">
+      <p>Entre com o e-mail cadastrado na tabela admins.</p>
+      <input id="emailAdmin" type="email" placeholder="seu@email.com">
+      <button id="loginAdmin" class="btn">Receber link de acesso</button>
+    </div>
+
+    <div id="painelAdmin" class="admin oculto">
+      <button id="logoutAdmin" class="btn secundario">Sair</button>
+
+      <section class="card interno">
+        <h3>Cadastrar ou atualizar jogo aberto</h3>
+        <form id="formJogo" class="form">
+          <input id="homeTeam" placeholder="Time A. Ex: Brasil" required>
+          <input id="awayTeam" placeholder="Time B. Ex: Escócia" required>
+          <input id="gameDate" type="date" required>
+          <input id="gameTime" type="time" required>
+          <select id="gameStatus">
+            <option value="open">Aberto</option>
+            <option value="closed">Fechado</option>
+            <option value="finished">Finalizado</option>
+          </select>
+          <button class="btn" type="submit">Salvar jogo</button>
+        </form>
+      </section>
+
+      <section class="card interno">
+        <h3>Validação de pagamentos</h3>
+        <div id="adminBets" class="lista"></div>
+      </section>
+    </div>
+  </dialog>
+
+  <footer>
+    <p>Bolão administrado manualmente. Apenas palpites validados entram no valor arrecadado.</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
