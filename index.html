@@ -25,6 +25,7 @@
       <section class="card">
         <h2>Jogo aberto</h2>
         <div id="gameBox" class="game-box">Carregando jogo...</div>
+        <div id="countdownBox" class="countdown hidden"></div>
         <form id="betForm" class="form">
           <input id="name" placeholder="Seu nome" required />
           <input id="whatsapp" placeholder="WhatsApp com DDD" required />
@@ -34,12 +35,13 @@
             <label id="awayScoreLabel" for="awayScore">Time B</label>
           </div>
           <div class="score-row">
-            <input id="homeScore" type="number" min="0" placeholder="Gols Time A" required />
+            <input id="homeScore" type="number" inputmode="numeric" min="0" placeholder="Gols Time A" required />
             <span>x</span>
-            <input id="awayScore" type="number" min="0" placeholder="Gols Time B" required />
+            <input id="awayScore" type="number" inputmode="numeric" min="0" placeholder="Gols Time B" required />
           </div>
           <button class="btn" type="submit">Enviar palpite</button>
         </form>
+        <div id="closedNotice" class="closed-notice hidden">Apostas encerradas para este jogo.</div>
         <div class="pix-box">
           <h3>Pagamento via Pix</h3>
           <p id="pixText"></p>
@@ -54,12 +56,29 @@
           <div><strong id="validBets">0</strong><span>validados</span></div>
           <div><strong id="pendingBets">0</strong><span>pendentes</span></div>
           <div><strong id="totalMoney">R$ 0,00</strong><span>arrecadado</span></div>
+          <div><strong id="prizeMoney">R$ 0,00</strong><span>prêmio estimado</span></div>
+          <div><strong id="officialScore">A definir</strong><span>resultado oficial</span></div>
+        </div>
+      </section>
+
+      <section class="card wide">
+        <h2>Regras rápidas</h2>
+        <div class="rules">
+          <div><strong>Valor</strong><span id="ruleValue">R$ 0,00 por palpite</span></div>
+          <div><strong>Pagamento</strong><span>Pix enviado ao organizador</span></div>
+          <div><strong>Validação</strong><span>O palpite só vale após aprovação do comprovante</span></div>
+          <div><strong>Pontuação</strong><span>Placar exato 5 pontos. Vencedor ou empate correto 3 pontos.</span></div>
         </div>
       </section>
 
       <section class="card wide">
         <h2>Placar mais escolhido</h2>
         <div id="scoreStats">Nenhum palpite enviado.</div>
+      </section>
+
+      <section class="card wide">
+        <h2>Ranking do jogo</h2>
+        <div id="rankingBox">O ranking aparece após o resultado oficial.</div>
       </section>
 
       <section class="card wide">
@@ -94,6 +113,20 @@
             <option value="finished">Finalizado</option>
           </select>
           <button id="saveGame" class="btn">Salvar jogo</button>
+        </section>
+        <section class="admin-box">
+          <h3>Resultado oficial</h3>
+          <div class="score-label-row">
+            <label id="adminResultHomeLabel">Time A</label>
+            <span></span>
+            <label id="adminResultAwayLabel">Time B</label>
+          </div>
+          <div class="score-row">
+            <input id="adminOfficialHome" type="number" inputmode="numeric" min="0" placeholder="Gols" />
+            <span>x</span>
+            <input id="adminOfficialAway" type="number" inputmode="numeric" min="0" placeholder="Gols" />
+          </div>
+          <button id="saveResult" class="btn">Salvar resultado</button>
         </section>
         <section class="admin-box">
           <h3>Validação de pagamentos</h3>

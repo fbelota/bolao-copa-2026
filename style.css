@@ -20,7 +20,7 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(
 .grid{display:grid;grid-template-columns:1fr .75fr;gap:18px;align-items:start}
 .card{background:rgba(15,29,49,.92);border:1px solid var(--border);border-radius:18px;padding:24px;box-shadow:0 12px 40px rgba(0,0,0,.25)}
 .wide{grid-column:span 1}
-.game-box{border:1px solid var(--border);border-radius:16px;padding:20px;margin:18px 0;background:var(--card2)}
+.game-box{border:1px solid var(--border);border-radius:16px;padding:20px;margin:18px 0 12px;background:var(--card2)}
 .match-card{display:grid;grid-template-columns:82px 1fr 82px;gap:18px;align-items:center}
 .flag{display:flex;align-items:center;justify-content:flex-start;min-width:0}
 .flag.right{justify-content:flex-end;text-align:right}
@@ -28,6 +28,10 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(
 .flag-fallback{display:inline-flex;align-items:center;justify-content:center;width:64px;height:44px;border-radius:8px;background:#203a60;color:#fff;font-weight:900;letter-spacing:.5px}
 .match-info{min-width:0;text-align:center;display:grid;place-items:center}
 .game-title{font-size:28px;font-weight:800;margin:0 0 8px;text-align:center;width:100%}
+.match-status{margin-top:8px;padding:6px 12px;border-radius:99px;background:rgba(41,211,145,.16);color:var(--green);font-weight:800;font-size:13px}
+.official-line{margin-top:8px;color:#fff;font-weight:800}
+.countdown,.closed-notice{border:1px solid var(--border);background:#081424;border-radius:14px;padding:12px 14px;margin:10px 0 14px;text-align:center;font-weight:800;color:var(--green)}
+.closed-notice{color:#ffd166}
 .muted{color:var(--muted)}
 .form{display:grid;gap:12px}
 input,select{width:100%;padding:15px;border-radius:12px;border:1px solid var(--border);background:#081424;color:var(--text);font-size:16px}
@@ -46,10 +50,15 @@ input::placeholder{color:#7f93ad}
 .pix-box p{word-break:break-word}
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .stats div{border:1px solid var(--border);border-radius:14px;padding:16px;background:var(--card2)}
-.stats strong{display:block;font-size:26px}
+.stats strong{display:block;font-size:25px}
 .stats span{color:var(--muted)}
-.bet-item,.score-item{border:1px solid var(--border);border-radius:14px;padding:14px;margin:10px 0;background:var(--card2)}
-.score-item{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.rules{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.rules div{border:1px solid var(--border);border-radius:14px;padding:14px;background:var(--card2)}
+.rules strong{display:block;margin-bottom:6px;color:var(--green)}
+.rules span{color:var(--muted)}
+.bet-item,.score-item,.ranking-item{border:1px solid var(--border);border-radius:14px;padding:14px;margin:10px 0;background:var(--card2)}
+.score-item,.ranking-item{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.ranking-item b{color:var(--green)}
 .bet-item strong{display:block}.status{display:inline-block;margin-top:8px;padding:5px 10px;border-radius:99px;background:#1a2d47;color:var(--muted);font-size:13px}.status.validated{background:rgba(41,211,145,.18);color:var(--green)}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.72);display:flex;align-items:flex-start;justify-content:center;padding:60px 18px;overflow:auto;z-index:20}
 .hidden{display:none!important}.modal-content{width:min(980px,100%);background:#07111f;border:1px solid var(--border);border-radius:18px}.modal-header{display:flex;justify-content:space-between;align-items:center;padding:22px;border-bottom:1px solid var(--border)}.modal-header h2{margin:0}.icon-btn{background:transparent;color:var(--text);border:0;font-size:30px;cursor:pointer}.admin-box{margin:22px;padding:22px;border:1px solid var(--border);border-radius:16px;background:var(--card);display:grid;gap:12px}.admin-row{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}
@@ -69,19 +78,19 @@ input::placeholder{color:#7f93ad}
   .hero p{font-size:16px}
   .hero-actions{grid-template-columns:1fr}
   .card{padding:16px;border-radius:16px}
-  .game-box{padding:14px;margin:14px 0}
+  .game-box{padding:14px;margin:14px 0 10px}
   .match-card{grid-template-columns:52px 1fr 52px;gap:10px}
   .flag-img,.flag-fallback{width:46px;height:32px;border-radius:7px}
-  .game-title{font-size:22px;margin-bottom:6px;line-height:1.15}
+  .game-title{font-size:21px;margin-bottom:6px;line-height:1.15}
   .match-info .muted{font-size:13px;line-height:1.35}
   input,select{font-size:16px;padding:14px}
   .score-label-row,.score-row{grid-template-columns:1fr 22px 1fr;gap:8px}
   .score-label-row label{font-size:14px}
   .btn{width:100%;padding:14px 12px}
-  .stats{grid-template-columns:1fr 1fr;gap:10px}
-  .stats div{padding:13px}
-  .stats strong{font-size:22px}
-  .score-item{align-items:flex-start;display:block}
+  .stats,.rules{grid-template-columns:1fr 1fr;gap:10px}
+  .stats div,.rules div{padding:13px}
+  .stats strong{font-size:21px}
+  .score-item,.ranking-item{align-items:flex-start;display:grid;gap:5px}
   .admin-row{grid-template-columns:1fr}
   .modal{padding:20px 10px}
   .admin-box{margin:14px;padding:16px}
@@ -90,5 +99,5 @@ input::placeholder{color:#7f93ad}
   .match-card{grid-template-columns:44px 1fr 44px}
   .flag-img,.flag-fallback{width:40px;height:28px}
   .game-title{font-size:19px}
-  .stats{grid-template-columns:1fr}
+  .stats,.rules{grid-template-columns:1fr}
 }
