@@ -6,6 +6,7 @@
   <title>Bolão Copa 2026</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
   <main class="page">
@@ -113,6 +114,7 @@
             <option value="finished">Finalizado</option>
           </select>
           <button id="saveGame" class="btn">Salvar jogo</button>
+          <button id="closeGameNow" class="btn danger">Encerrar apostas agora</button>
         </section>
         <section class="admin-box">
           <h3>Resultado oficial</h3>
@@ -130,8 +132,11 @@
         </section>
         <section class="admin-box">
           <h3>Validação de pagamentos</h3>
-          <input id="adminBetSearch" placeholder="Buscar por nome ou WhatsApp" />
-          <button id="exportBets" class="btn secondary" type="button">Exportar apostas</button>
+          <div class="admin-tools">
+            <input id="adminBetSearch" placeholder="Buscar por nome ou WhatsApp" />
+            <button id="exportBets" class="btn secondary">Exportar Excel (.xlsx)</button>
+          </div>
+          <p class="muted small-note">O WhatsApp aparece completo apenas aqui no painel. No site público ele fica mascarado.</p>
           <div id="adminBets">Nenhum palpite ainda.</div>
         </section>
       </div>

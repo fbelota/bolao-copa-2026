@@ -1,24 +1,26 @@
-# Bolão Copa 2026 V12
+# Bolão Copa 2026 V13
 
-Versão com correção administrativa para apostas pendentes.
+Versão com painel administrativo completo.
 
-## O que entrou
+## Novidades
 
-- Excluir aposta pendente pelo painel do organizador.
-- Editar placar de aposta pendente.
-- Busca por nome ou WhatsApp no painel.
-- Exportação CSV das apostas.
-- Mantém bloqueio contra exclusão e edição de apostas já validadas.
+- Excluir aposta pendente
+- Editar aposta pendente
+- Buscar por nome ou WhatsApp
+- Exportar apostas para Excel .xlsx
+- WhatsApp mascarado no público e completo no painel
+- Encerrar apostas agora
+- Fechamento automático 1 hora antes do jogo
 
 ## Antes de subir
 
 Execute no Supabase:
 
-`supabase-ajuste-v12.sql`
+`supabase-ajuste-v13.sql`
 
-## Subir no GitHub
+Esse script não apaga dados. Ele só cria políticas de permissão.
 
-Substitua estes arquivos no repositório:
+## Arquivos para subir no GitHub
 
 - index.html
 - style.css
@@ -26,4 +28,4 @@ Substitua estes arquivos no repositório:
 - config.js
 - README.md
 
-Depois abra o site e pressione Ctrl + F5.
+Depois use Ctrl + F5 no site.

@@ -107,3 +107,7 @@ input::placeholder{color:#7f93ad}
 @media(max-width:560px){
   .admin-actions{justify-content:stretch;display:grid;grid-template-columns:1fr}
 }
+
+.admin-tools{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}
+.small-note{font-size:13px;margin:0}
+@media(max-width:560px){.admin-tools{grid-template-columns:1fr}.admin-tools .btn{width:100%}}

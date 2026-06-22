@@ -280,17 +280,24 @@ window.editBet = editBet;
 
 function exportBets(){
   if(!latestBets.length) return alert('Nenhuma aposta para exportar.');
-  const headers = ['id','nome','whatsapp','placar_casa','placar_fora','status','jogo'];
-  const rows = latestBets.map(b => [
-    b.id,
-    b.name,
-    b.whatsapp,
-    b.home_score,
-    b.away_score,
-    betStatusLabel(b.status),
-    currentGame ? `${currentGame.home_team} x ${currentGame.away_team}` : ''
-  ]);
-  const csv = [headers, ...rows]
+  const rows = latestBets.map(b => ({
+    ID: b.id,
+    Nome: b.name,
+    WhatsApp: b.whatsapp,
+    Jogo: currentGame ? `${currentGame.home_team} x ${currentGame.away_team}` : '',
+    Palpite: `${b.home_score} x ${b.away_score}`,
+    Status: betStatusLabel(b.status),
+    Pontos: betPoints(b) ?? '',
+  }));
+  if(window.XLSX){
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Apostas');
+    XLSX.writeFile(wb, `apostas-bolao-${new Date().toISOString().slice(0,10)}.xlsx`);
+    return;
+  }
+  const headers = Object.keys(rows[0] || {});
+  const csv = [headers, ...rows.map(r => headers.map(h => r[h]))]
     .map(row => row.map(v => `"${String(v ?? '').replace(/"/g,'""')}"`).join(';'))
     .join('\n');
   const blob = new Blob(['\ufeff' + csv], { type:'text/csv;charset=utf-8;' });
@@ -303,6 +310,7 @@ function exportBets(){
   a.remove();
   URL.revokeObjectURL(url);
 }
+window.exportBets = exportBets;
 
 async function saveGame(){
   const payload = { home_team: $('adminHomeTeam').value.trim(), away_team: $('adminAwayTeam').value.trim(), game_date: $('adminDate').value, game_time: $('adminTime').value, status: $('adminStatus').value };
@@ -323,6 +331,18 @@ async function saveResult(){
   await loadGame();
   await loadBets();
 }
+
+async function closeGameNow(){
+  if(!currentGame?.id) return alert('Cadastre um jogo antes.');
+  const ok = confirm('Deseja encerrar as apostas agora?\n\nDepois disso, novos palpites serão bloqueados até você reabrir o jogo no status Aberto.');
+  if(!ok) return;
+  const { error } = await supabaseClient.from('games').update({ status:'closed' }).eq('id', currentGame.id);
+  if(error){ showError('Erro ao encerrar apostas', error); return; }
+  alert('Apostas encerradas para este jogo.');
+  await loadGame();
+  await loadBets();
+}
+window.closeGameNow = closeGameNow;
 
 async function isAdmin(email){
   const normalized = String(email || '').trim().toLowerCase();
@@ -366,6 +386,7 @@ function bindEvents(){
   $('sendLogin').addEventListener('click', sendLogin);
   $('logoutBtn').addEventListener('click', logout);
   $('saveGame').addEventListener('click', saveGame);
+  $('closeGameNow')?.addEventListener('click', closeGameNow);
   $('saveResult').addEventListener('click', saveResult);
   $('adminBetSearch')?.addEventListener('input', () => renderAdminBets(latestBets));
   $('exportBets')?.addEventListener('click', exportBets);
