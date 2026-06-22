@@ -1,19 +1,24 @@
-# Bolão Copa 2026 V9
+# Bolão Copa 2026 V12
 
-Versão otimizada para divulgação por WhatsApp e uso em celular.
+Versão com correção administrativa para apostas pendentes.
 
-## O que mudou
+## O que entrou
 
-- Layout mais responsivo para celular.
-- Texto do jogo centralizado entre as bandeiras.
-- Botão Compartilhar no WhatsApp.
-- Campos de placar com nomes dos times.
-- Botões e cards ajustados para toque.
-- Sem PWA e sem instalação de aplicativo.
+- Excluir aposta pendente pelo painel do organizador.
+- Editar placar de aposta pendente.
+- Busca por nome ou WhatsApp no painel.
+- Exportação CSV das apostas.
+- Mantém bloqueio contra exclusão e edição de apostas já validadas.
 
-## Arquivos para subir no GitHub
+## Antes de subir
 
-Substitua no repositório:
+Execute no Supabase:
+
+`supabase-ajuste-v12.sql`
+
+## Subir no GitHub
+
+Substitua estes arquivos no repositório:
 
 - index.html
 - style.css
@@ -22,9 +27,3 @@ Substitua no repositório:
 - README.md
 
 Depois abra o site e pressione Ctrl + F5.
-
-
-Ajustes da V11:
-- Apostas encerram automaticamente 1 hora antes do jogo.
-- Card Pontuação removido das regras rápidas.
-- Card Encerramento incluído no lugar.

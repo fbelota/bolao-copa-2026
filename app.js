@@ -195,17 +195,28 @@ function renderRanking(bets){
 function renderAdminBets(bets){
   const box = $('adminBets');
   if(!box) return;
-  box.innerHTML = bets.length ? bets.map(b => `
+  const term = String($('adminBetSearch')?.value || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+  const filtered = term ? bets.filter(b => {
+    const hay = `${b.name || ''} ${b.whatsapp || ''}`.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+    return hay.includes(term);
+  }) : bets;
+  box.innerHTML = filtered.length ? filtered.map(b => {
+    const paid = b.status === 'validated' || b.status === 'paid';
+    return `
     <div class="bet-item admin-row">
       <div>
         <strong>${escapeHtml(b.name)}</strong>
         <div class="muted">WhatsApp: ${escapeHtml(b.whatsapp)}</div>
         <div>Palpite: ${b.home_score} x ${b.away_score}</div>
-        <span class="status ${(b.status === 'validated' || b.status === 'paid') ? 'validated':''}">${betStatusLabel(b.status)}</span>
+        <span class="status ${paid ? 'validated':''}">${betStatusLabel(b.status)}</span>
       </div>
-      ${(b.status === 'validated' || b.status === 'paid') ? '<button class="btn secondary" disabled>Validado</button>' : `<button class="btn" onclick="validateBet(${b.id})">Validar pagamento</button>`}
-    </div>`).join('') : 'Nenhum palpite ainda.';
+      <div class="admin-actions">
+        ${paid ? '<button class="btn secondary" disabled>Validado</button>' : `<button class="btn" onclick="validateBet(${b.id})">Validar pagamento</button><button class="btn secondary" onclick="editBet(${b.id})">Editar</button><button class="btn danger" onclick="deleteBet(${b.id})">Excluir</button>`}
+      </div>
+    </div>`;
+  }).join('') : 'Nenhum palpite encontrado.';
 }
+
 
 async function submitBet(e){
   e.preventDefault();
@@ -223,6 +234,75 @@ async function validateBet(id){
   await loadBets();
 }
 window.validateBet = validateBet;
+
+async function deleteBet(id){
+  const bet = latestBets.find(b => Number(b.id) === Number(id));
+  if(!bet) return alert('Aposta não encontrada.');
+  if(bet.status === 'validated' || bet.status === 'paid'){
+    return alert('Apostas já validadas não podem ser excluídas pelo painel.');
+  }
+  const ok = confirm(`Excluir a aposta de ${bet.name}?\n\nPalpite: ${bet.home_score} x ${bet.away_score}\n\nEssa ação não pode ser desfeita.`);
+  if(!ok) return;
+  const { error } = await supabaseClient
+    .from('bets')
+    .delete()
+    .eq('id', id)
+    .eq('status', 'pending');
+  if(error){ showError('Erro ao excluir aposta', error); return; }
+  await loadBets();
+  alert('Aposta pendente excluída.');
+}
+window.deleteBet = deleteBet;
+
+async function editBet(id){
+  const bet = latestBets.find(b => Number(b.id) === Number(id));
+  if(!bet) return alert('Aposta não encontrada.');
+  if(bet.status === 'validated' || bet.status === 'paid'){
+    return alert('Apostas já validadas não podem ser editadas pelo painel.');
+  }
+  const newHome = prompt(`Novo placar para ${currentGame?.home_team || 'Time A'}:`, bet.home_score);
+  if(newHome === null) return;
+  const newAway = prompt(`Novo placar para ${currentGame?.away_team || 'Time B'}:`, bet.away_score);
+  if(newAway === null) return;
+  if(newHome === '' || newAway === '' || Number(newHome) < 0 || Number(newAway) < 0 || Number.isNaN(Number(newHome)) || Number.isNaN(Number(newAway))){
+    return alert('Informe placares válidos.');
+  }
+  const { error } = await supabaseClient
+    .from('bets')
+    .update({ home_score: Number(newHome), away_score: Number(newAway) })
+    .eq('id', id)
+    .eq('status', 'pending');
+  if(error){ showError('Erro ao editar aposta', error); return; }
+  await loadBets();
+  alert('Aposta pendente editada.');
+}
+window.editBet = editBet;
+
+function exportBets(){
+  if(!latestBets.length) return alert('Nenhuma aposta para exportar.');
+  const headers = ['id','nome','whatsapp','placar_casa','placar_fora','status','jogo'];
+  const rows = latestBets.map(b => [
+    b.id,
+    b.name,
+    b.whatsapp,
+    b.home_score,
+    b.away_score,
+    betStatusLabel(b.status),
+    currentGame ? `${currentGame.home_team} x ${currentGame.away_team}` : ''
+  ]);
+  const csv = [headers, ...rows]
+    .map(row => row.map(v => `"${String(v ?? '').replace(/"/g,'""')}"`).join(';'))
+    .join('\n');
+  const blob = new Blob(['\ufeff' + csv], { type:'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `apostas-bolao-${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
 
 async function saveGame(){
   const payload = { home_team: $('adminHomeTeam').value.trim(), away_team: $('adminAwayTeam').value.trim(), game_date: $('adminDate').value, game_time: $('adminTime').value, status: $('adminStatus').value };
@@ -287,6 +367,8 @@ function bindEvents(){
   $('logoutBtn').addEventListener('click', logout);
   $('saveGame').addEventListener('click', saveGame);
   $('saveResult').addEventListener('click', saveResult);
+  $('adminBetSearch')?.addEventListener('input', () => renderAdminBets(latestBets));
+  $('exportBets')?.addEventListener('click', exportBets);
 }
 async function init(){
   setupWhatsApp();
