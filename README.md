@@ -1,26 +1,20 @@
-# Bolão Copa 2026 V13
+# Bolão Copa 2026 V14
 
-Versão com painel administrativo completo.
+Versão com jogos isolados, histórico dos jogos finalizados e cálculo automático dos ganhadores por placar exato.
 
-## Novidades
+## O que mudou
 
-- Excluir aposta pendente
-- Editar aposta pendente
-- Buscar por nome ou WhatsApp
-- Exportar apostas para Excel .xlsx
-- WhatsApp mascarado no público e completo no painel
-- Encerrar apostas agora
-- Fechamento automático 1 hora antes do jogo
+- As apostas do jogo finalizado ficam guardadas no histórico.
+- O jogo novo começa com área limpa.
+- As apostas antigas não entram no jogo aberto.
+- Ranking removido.
+- Mostra quem acertou o placar exato.
+- Calcula quanto cada ganhador recebe em partes iguais.
+- Exportação e validação continuam apenas para o jogo atual.
 
-## Antes de subir
+## Como publicar
 
-Execute no Supabase:
-
-`supabase-ajuste-v13.sql`
-
-Esse script não apaga dados. Ele só cria políticas de permissão.
-
-## Arquivos para subir no GitHub
+Substitua no GitHub:
 
 - index.html
 - style.css
@@ -28,4 +22,13 @@ Esse script não apaga dados. Ele só cria políticas de permissão.
 - config.js
 - README.md
 
-Depois use Ctrl + F5 no site.
+Depois abra o site e pressione Ctrl + F5.
+
+## Banco
+
+Não precisa executar SQL novo se você já executou os ajustes das versões anteriores que adicionaram:
+
+- official_home_score
+- official_away_score
+
+A V14 não apaga dados.

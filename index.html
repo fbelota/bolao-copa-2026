@@ -78,12 +78,13 @@
       </section>
 
       <section class="card wide">
-        <h2>Ranking do jogo</h2>
-        <div id="rankingBox">O ranking aparece após o resultado oficial.</div>
+        <h2>Jogos finalizados</h2>
+        <p class="muted">As apostas dos jogos encerrados ficam guardadas aqui. Elas não entram no jogo aberto.</p>
+        <div id="historyBox">Nenhum jogo finalizado ainda.</div>
       </section>
 
       <section class="card wide">
-        <h2>Palpites enviados</h2>
+        <h2>Palpites do jogo atual</h2>
         <div id="publicBets">Nenhum palpite ainda.</div>
       </section>
     </section>
@@ -113,7 +114,8 @@
             <option value="closed">Fechado</option>
             <option value="finished">Finalizado</option>
           </select>
-          <button id="saveGame" class="btn">Salvar jogo</button>
+          <button id="saveGame" class="btn">Salvar jogo atual</button>
+          <button id="newGameBtn" class="btn secondary">Preparar próximo jogo</button>
           <button id="closeGameNow" class="btn danger">Encerrar apostas agora</button>
         </section>
         <section class="admin-box">
@@ -131,7 +133,7 @@
           <button id="saveResult" class="btn">Salvar resultado</button>
         </section>
         <section class="admin-box">
-          <h3>Validação de pagamentos</h3>
+          <h3>Validação de pagamentos do jogo atual</h3>
           <div class="admin-tools">
             <input id="adminBetSearch" placeholder="Buscar por nome ou WhatsApp" />
             <button id="exportBets" class="btn secondary">Exportar Excel (.xlsx)</button>
